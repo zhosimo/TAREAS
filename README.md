@@ -1,2 +1,11 @@
-# TAREAS
-Análisis de los datos históricos de existencias/ingresos y creación de un cuadro de mando
+import yfinance as yf
+
+# Descargar los datos históricos de precios de acciones de Tesla (TSLA)
+tesla = yf.Ticker("TSLA")
+tesla_history = tesla.history(period="max")
+
+# Mostrar las primeras filas
+tesla_history.head()
+
+
+
