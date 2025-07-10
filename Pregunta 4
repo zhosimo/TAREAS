@@ -1,0 +1,35 @@
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+
+# URL de la página
+url = "https://www.macrotrends.net/stocks/charts/GME/gamestop/revenue"
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+}
+response = requests.get(url, headers=headers)
+soup = BeautifulSoup(response.text, "html.parser")
+
+# Extraer la tabla 0: Annual Revenue
+tables = soup.find_all("table")
+gme_revenue_table = tables[0]
+
+# Obtener datos año por año
+data = []
+for row in gme_revenue_table.find_all("tr")[1:]:
+    cols = row.find_all("td")
+    if len(cols) == 2:
+        year = cols[0].text.strip()
+        revenue = cols[1].text.strip().replace("$", "").replace(",", "")
+        try:
+            revenue = float(revenue)
+            data.append([int(year), revenue])
+        except ValueError:
+            continue
+
+# Crear DataFrame y ordenar por año
+df = pd.DataFrame(data, columns=["Year", "Revenue (Millions USD)"])
+df = df.sort_values(by="Year").reset_index(drop=True)
+
+# Mostrar tabla ordenada
+print(df)
