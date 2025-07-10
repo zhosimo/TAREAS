@@ -1,0 +1,43 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Simular datos de precios diarios de acciones (tesla_history)
+fechas = pd.date_range(start="2020-01-01", end="2020-12-31", freq="D")
+precio_cierre = np.random.uniform(low=100, high=700, size=len(fechas))
+
+tesla_history = pd.DataFrame({
+    "Date": fechas,
+    "Close": precio_cierre
+})
+
+# Simular datos trimestrales de ingresos (tesla_revenue_df)
+fechas_revenue = pd.date_range(start="2020-01-01", end="2020-12-31", freq="QE")  # ✅ CORREGIDO: 'QE' en lugar de 'Q'
+ingresos = np.random.uniform(low=4e9, high=10e9, size=len(fechas_revenue))  # en USD
+
+tesla_revenue_df = pd.DataFrame({
+    "Date": fechas_revenue,
+    "Revenue": ingresos
+})
+
+# Convertir fechas a datetime (por precaución)
+tesla_revenue_df["Date"] = pd.to_datetime(tesla_revenue_df["Date"])
+tesla_history["Date"] = pd.to_datetime(tesla_history["Date"])
+
+# Combinar los datasets por la fecha más cercana anterior o igual
+tesla_combined = pd.merge_asof(
+    tesla_history.sort_values("Date"),
+    tesla_revenue_df.sort_values("Date"),
+    on="Date"
+)
+
+# Graficar
+plt.figure(figsize=(14, 6))
+plt.plot(tesla_combined["Date"], tesla_combined["Close"], label="Precio de Cierre (TSLA)")
+plt.plot(tesla_combined["Date"], tesla_combined["Revenue"] / 1e9, label="Ingresos (miles de millones)")
+plt.title("Tesla: Precio de la acción vs Ingresos (Simulado)")
+plt.xlabel("Fecha")
+plt.ylabel("USD")
+plt.legend()
+plt.grid(True)
+plt.show()
