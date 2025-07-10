@@ -1,0 +1,9 @@
+# Importar yfinance
+import yfinance as yf
+
+# Descargar los datos históricos de precios de acciones de GameStop (GME)
+gamestop = yf.Ticker("GME")
+gme_history = gamestop.history(period="max")
+
+# Mostrar las primeras filas
+gme_history.head()
