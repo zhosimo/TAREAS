@@ -1,0 +1,33 @@
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+
+url = "https://www.macrotrends.net/stocks/charts/TSLA/tesla/revenue"
+headers = {"User-Agent": "Mozilla/5.0"}  # A veces ayuda
+response = requests.get(url, headers=headers)
+soup = BeautifulSoup(response.text, "html.parser")
+
+# Verifica cuántas tablas hay
+tables = soup.find_all("table")
+print(f"Número de tablas encontradas: {len(tables)}")
+
+# Imprime partes del contenido para identificar la correcta
+for i, table in enumerate(tables):
+    if "Tesla Quarterly Revenue" in str(table):
+        print(f"Tabla encontrada en el índice {i}")
+        tesla_revenue = table
+        break
+else:
+    raise ValueError("No se encontró la tabla de ingresos de Tesla")
+
+# Extraer datos
+data = []
+for row in tesla_revenue.find_all("tr")[1:]:
+    cols = row.find_all("td")
+    if len(cols) == 2:
+        date = cols[0].text.strip()
+        revenue = cols[1].text.strip().replace("$", "").replace(",", "")
+        data.append([date, revenue])
+
+tesla_revenue_df = pd.DataFrame(data, columns=["Date", "Revenue"])
+print(tesla_revenue_df.head())
